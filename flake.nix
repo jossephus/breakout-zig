@@ -1,7 +1,6 @@
 {
   inputs = {
     nixpkgs.url = "nixpkgs/nixos-unstable";
-    glibcnixpkgs.url = "github:NixOS/nixpkgs/807c549feabce7eddbf259dbdcec9e0600a0660d";
     flake-utils.url = "github:numtide/flake-utils";
     zig.url = "github:mitchellh/zig-overlay";
   };
@@ -10,7 +9,6 @@
     nixpkgs,
     flake-utils,
     zig,
-    glibcnixpkgs,
     ...
   }:
     flake-utils.lib.eachDefaultSystem (
@@ -38,7 +36,6 @@
           xorg.libXi
           glfw-wayland
           zigpkgs."0.14.0"
-          glibcnixpkgs.legacyPackages.${system}.glibc
         ];
       in {
         devShell = pkgs.mkShell {
