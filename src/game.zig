@@ -1,7 +1,5 @@
 const std = @import("std");
-const r = @cImport({
-    @cInclude("raylib.h");
-});
+const r = @import("raylib.zig").raylib;
 const bricks = @import("brick.zig");
 const balls = @import("ball.zig");
 const paddle = @import("paddle.zig");
@@ -59,9 +57,9 @@ pub const Game = struct {
             .ball_texture = r.LoadTexture("res/tennis.png"),
             .paddle_texture = r.LoadTexture("res/paddle.png"),
             .status = GameStatus.Start,
-            .bricks = try bricks.new_bricks(allocator, 5, 10),
-            .ball = balls.new_ball(),
-            .paddle = paddle.new_paddle(),
+            .bricks = try bricks.Brick.new_bricks(allocator, 5, 10),
+            .ball = balls.Ball.new(),
+            .paddle = paddle.Paddle.new(),
             .camera_shake_ttl = 0.0,
             .particle_instances = std.ArrayList(particle.Particles).init(allocator),
             .score = 0,
@@ -84,9 +82,9 @@ pub const Game = struct {
             .ball_texture = r.LoadTexture("res/tennis.png"),
             .paddle_texture = r.LoadTexture("res/paddle.png"),
             .status = GameStatus.Start,
-            .bricks = try bricks.new_bricks(allocator, 5, 10),
-            .ball = balls.new_ball(),
-            .paddle = paddle.new_paddle(),
+            .bricks = try bricks.Brick.new_bricks(allocator, 5, 10),
+            .ball = balls.Ball.new(),
+            .paddle = paddle.Paddle.new(),
             .camera_shake_ttl = 0.0,
             .particle_instances = std.ArrayList(particle.Particles).init(allocator),
             .score = 0,
@@ -156,7 +154,7 @@ pub const Game = struct {
             self.camera_shake_ttl = CAMERA_SHAKE_TTL;
 
             //_ = self.particle_instances.append(particle.new_particles(&self.randomness, b.rec.x, b.rec.y));
-            _ = self.score_indicators.append(score.newScoreIndicator(
+            _ = self.score_indicators.append(score.ScoreIndicator.new(
                 self.score_multiplier,
                 b.rec.x + bricks.BRICK_W / 2.0,
                 b.rec.y,
@@ -239,20 +237,20 @@ pub const Game = struct {
         r.ClearBackground(r.Color{ .r = 0, .g = 0, .b = 0, .a = 255 });
 
         for (self.bricks.items) |b| {
-            bricks.draw_brick(b, self.brick_texture);
+            b.draw(self.brick_texture);
         }
 
         for (self.particle_instances.items) |pi| {
-            particle.draw_particles(pi);
+            pi.draw_particles();
         }
 
-        paddle.draw_paddle(self.paddle, self.paddle_texture);
-        balls.drawBall(self.ball, self.ball_texture);
+        self.paddle.draw(self.paddle_texture);
+        self.ball.draw(self.ball_texture);
 
         r.EndMode2D();
 
         for (self.score_indicators.items) |s| {
-            score.drawScoreIndicator(s);
+            s.draw();
         }
 
         var fps_text_buf: [32]u8 = undefined;

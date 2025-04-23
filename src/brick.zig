@@ -1,7 +1,7 @@
 const std = @import("std");
-const r = @cImport({
-    @cInclude("raylib.h");
-});
+const r = @import("raylib.zig").raylib;
+
+pub const Brick = @This();
 
 pub const BRICK_W: f32 = 48.0;
 pub const BRICK_H: f32 = 16.0;
@@ -16,11 +16,9 @@ const BRICK_TEXTURE_DIMS = r.Rectangle{
     .height = 16.0,
 };
 
-pub const Brick = struct {
-    rec: r.Rectangle,
-};
+rec: r.Rectangle,
 
-pub fn new_brick(x: f32, y: f32) Brick {
+pub fn new(x: f32, y: f32) @This() {
     return Brick{
         .rec = r.Rectangle{
             .x = x,
@@ -40,14 +38,14 @@ pub fn new_bricks(allocator: std.mem.Allocator, rows: i32, cols: i32) !std.Array
         while (j < cols) : (j += 1) {
             const bx = @as(f32, @floatFromInt(j)) * BRICK_W + (@as(f32, @floatFromInt(j)) + 1.0) * BRICK_GAP + BRICK_MARGIN;
             const by = @as(f32, @floatFromInt(i)) * BRICK_H + (@as(f32, @floatFromInt(i)) + 1.0) * BRICK_GAP + BRICK_MARGIN;
-            try list.append(new_brick(bx, by));
+            try list.append(new(bx, by));
         }
     }
 
     return list;
 }
 
-pub fn draw_brick(b: Brick, t: r.Texture2D) void {
+pub fn draw(b: @This(), t: r.Texture2D) void {
     r.DrawTexturePro(
         t,
         BRICK_TEXTURE_DIMS,

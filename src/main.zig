@@ -1,8 +1,6 @@
 const Game = @import("game.zig").Game;
 const std = @import("std");
-const r = @cImport({
-    @cInclude("raylib.h");
-});
+const r = @import("raylib.zig").raylib;
 const engine = @import("engine.zig");
 
 pub fn main() !void {

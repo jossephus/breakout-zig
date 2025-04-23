@@ -1,12 +1,15 @@
-const r = @cImport({
-    @cInclude("raylib.h");
-});
+const r = @import("raylib.zig").raylib;
 const engine = @import("engine.zig");
 const paddle = @import("paddle.zig");
+
+pub const Ball = @This();
 
 pub const BALL_W: f32 = 16.0;
 pub const BALL_H: f32 = 16.0;
 pub const BALL_SPEED: f32 = 300.0;
+
+rec: r.Rectangle,
+vel: r.Vector2,
 
 const BALL_TEXTURE_DIMS = r.Rectangle{
     .x = 0.0,
@@ -15,12 +18,7 @@ const BALL_TEXTURE_DIMS = r.Rectangle{
     .height = 16.0,
 };
 
-pub const Ball = struct {
-    rec: r.Rectangle,
-    vel: r.Vector2,
-};
-
-pub fn new_ball() Ball {
+pub fn new() Ball {
     return Ball{
         .rec = r.Rectangle{
             .x = @as(f32, engine.W_W) / 2.0 - BALL_W / 2.0,
@@ -35,7 +33,7 @@ pub fn new_ball() Ball {
     };
 }
 
-pub fn drawBall(b: Ball, t: r.Texture2D) void {
+pub fn draw(b: Ball, t: r.Texture2D) void {
     r.DrawTexturePro(
         t,
         BALL_TEXTURE_DIMS,
