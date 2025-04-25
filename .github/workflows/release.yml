@@ -1,0 +1,30 @@
+on: [push]
+name: Release
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Nix
+        uses: cachix/install-nix-action@v31
+        with:
+          nix_path: nixpkgs=channel:nixos-unstable
+
+      - run: nix develop -L --verbose
+
+      - name: release-linux
+        run: zig build
+
+      - name: release-windows
+        run: zig build -Dtarget=x86_64-windows
+
+      - name: Upload Releases
+        uses: softprops/action-gh-release@v1
+        with:
+          files: |
+            ./zig-out/bin/breakout.exe
+            ./zig-out/bin/breakout
