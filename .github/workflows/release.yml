@@ -3,6 +3,8 @@ name: Release
 
 jobs:
   release:
+    permissions:
+      contents: write
     runs-on: ubuntu-latest
 
     steps:
@@ -28,5 +30,3 @@ jobs:
           files: |
             ./zig-out/bin/breakout.exe
             ./zig-out/bin/breakout
-        permissions:
-          contents: write
