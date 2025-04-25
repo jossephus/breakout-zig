@@ -17,10 +17,10 @@ jobs:
       - run: nix develop -L --verbose
 
       - name: release-linux
-        run: zig build
+        run: nix develop -c zig build
 
       - name: release-windows
-        run: zig build -Dtarget=x86_64-windows
+        run: nix develop -c zig build -Dtarget=x86_64-windows
 
       - name: Upload Releases
         uses: softprops/action-gh-release@v1
