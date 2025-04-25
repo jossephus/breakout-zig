@@ -1,8 +1,5 @@
 const std = @import("std");
 
-// Although this function looks imperative, note that its job is to
-// declaratively construct a build graph that will be executed by an external
-// runner.
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
     const optimize = b.standardOptimizeOption(.{});
@@ -25,6 +22,23 @@ pub fn build(b: *std.Build) void {
         .linux_display_backend = .X11,
     });
     exe.linkLibrary(raylib_dep.artifact("raylib"));
+
+    const assets = [_][]const u8{
+        "res/paddle.png",
+        "res/tennis.png",
+        "res/brick.png",
+    };
+
+    for (assets) |asset| {
+        exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+    }
+
+    const install_step = b.addInstallDirectory(.{
+        .source_dir = b.path("res"),
+        .install_dir = std.Build.InstallDir{ .custom = "res" },
+        .install_subdir = "res",
+    });
+    exe.step.dependOn(&install_step.step);
 
     b.installArtifact(exe);
 

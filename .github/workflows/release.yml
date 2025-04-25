@@ -19,10 +19,10 @@ jobs:
       - run: nix develop -L --verbose
 
       - name: release-linux
-        run: nix develop -c zig build
+        run: nix develop -c zig build -Doptimize=ReleaseSmall
 
       - name: release-windows
-        run: nix develop -c zig build -Dtarget=x86_64-windows
+        run: nix develop -c zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall
 
       - name: Upload Releases
         uses: softprops/action-gh-release@v1

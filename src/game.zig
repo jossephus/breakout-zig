@@ -1,5 +1,6 @@
 const std = @import("std");
-const r = @import("raylib.zig").raylib;
+const raylib = @import("raylib.zig");
+const r = raylib.raylib;
 const bricks = @import("brick.zig");
 const balls = @import("ball.zig");
 const paddle = @import("paddle.zig");
@@ -53,9 +54,9 @@ pub const Game = struct {
     pub fn init(allocator: std.mem.Allocator) !Game {
         return Game{
             .allocator = allocator,
-            .brick_texture = r.LoadTexture("res/brick.png"),
-            .ball_texture = r.LoadTexture("res/tennis.png"),
-            .paddle_texture = r.LoadTexture("res/paddle.png"),
+            .brick_texture = raylib.loadTextureFromPath("res/brick.png"),
+            .ball_texture = raylib.loadTextureFromPath("res/tennis.png"),
+            .paddle_texture = raylib.loadTextureFromPath("res/paddle.png"),
             .status = GameStatus.Start,
             .bricks = try bricks.Brick.new_bricks(allocator, 5, 10),
             .ball = balls.Ball.new(),
@@ -78,9 +79,9 @@ pub const Game = struct {
         const allocator = self.allocator;
         self.* = Game{
             .allocator = self.allocator,
-            .brick_texture = r.LoadTexture("res/brick.png"),
-            .ball_texture = r.LoadTexture("res/tennis.png"),
-            .paddle_texture = r.LoadTexture("res/paddle.png"),
+            .brick_texture = raylib.loadTextureFromPath("res/brick.png"),
+            .ball_texture = raylib.loadTextureFromPath("res/tennis.png"),
+            .paddle_texture = raylib.loadTextureFromPath("res/paddle.png"),
             .status = GameStatus.Start,
             .bricks = try bricks.Brick.new_bricks(allocator, 5, 10),
             .ball = balls.Ball.new(),
