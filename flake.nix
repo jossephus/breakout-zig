@@ -36,6 +36,7 @@
           xorg.libXi
           glfw-wayland
           zigpkgs."0.14.0"
+          emscripten
         ];
       in {
         devShell = pkgs.mkShell {
@@ -43,6 +44,12 @@
           nativeBuildInputs = with pkgs; [cmake pkg-config ncurses fontconfig freetype];
           shellHook = ''
             export SHELL=/usr/bin/bash
+            if [ ! -d $(pwd)/.emscripten_cache-${pkgs.emscripten.version} ]; then
+              cp -R ${pkgs.emscripten}/share/emscripten/cache/ $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
+              chmod u+rwX -R $(pwd)/.emscripten_cache-${pkgs.emscripten.version}
+            fi
+            export EM_CACHE=$(pwd)/.emscripten_cache-${pkgs.emscripten.version}
+            echo emscripten cache dir: $EM_CACHE
           '';
         };
       }

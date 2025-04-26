@@ -10,46 +10,108 @@ pub fn build(b: *std.Build) void {
         .optimize = optimize,
     });
 
-    const exe = b.addExecutable(.{
-        .name = "breakout",
-        .root_module = exe_mod,
-        .link_libc = true,
-    });
+    if (!target.result.cpu.arch.isWasm()) {
+        const exe = b.addExecutable(.{
+            .name = "breakout",
+            .root_module = exe_mod,
+            .link_libc = true,
+        });
 
-    const raylib_dep = b.dependency("raylib", .{
-        .target = target,
-        .optimize = optimize,
-        .linux_display_backend = .X11,
-    });
-    exe.linkLibrary(raylib_dep.artifact("raylib"));
+        const raylib_dep = b.dependency("raylib", .{
+            .target = target,
+            .optimize = optimize,
+            .linux_display_backend = .X11,
+        });
 
-    const assets = [_][]const u8{
-        "res/paddle.png",
-        "res/tennis.png",
-        "res/brick.png",
-    };
+        const raylib_lib = raylib_dep.artifact("raylib");
+        exe.linkLibrary(raylib_lib);
+        const install_step = b.addInstallDirectory(.{
+            .source_dir = b.path("res"),
+            .install_dir = std.Build.InstallDir{ .custom = "res" },
+            .install_subdir = "res",
+        });
+        exe.step.dependOn(&install_step.step);
+        const assets = [_][]const u8{
+            "res/paddle.png",
+            "res/tennis.png",
+            "res/brick.png",
+        };
 
-    for (assets) |asset| {
-        exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+        for (assets) |asset| {
+            exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+        }
+
+        b.installArtifact(exe);
+
+        const run_cmd = b.addRunArtifact(exe);
+
+        run_cmd.step.dependOn(b.getInstallStep());
+
+        if (b.args) |args| {
+            run_cmd.addArgs(args);
+        }
+
+        const run_step = b.step("run", "Run the app");
+        run_step.dependOn(&run_cmd.step);
+    } else {
+        const wasm_target = b.resolveTargetQuery(.{
+            .cpu_arch = .wasm32,
+            .cpu_model = .{ .explicit = &std.Target.wasm.cpu.mvp },
+            .cpu_features_add = std.Target.wasm.featureSet(&.{
+                .atomics,
+                .bulk_memory,
+            }),
+            .os_tag = .freestanding,
+        });
+
+        const raylib_dep = b.dependency("raylib", .{
+            .target = wasm_target,
+            .optimize = optimize,
+            .rmodels = false,
+        });
+        const raylib_artifact = raylib_dep.artifact("raylib");
+
+        const app_lib = b.addLibrary(.{
+            .linkage = .static,
+            .name = "breakout",
+            .root_module = exe_mod,
+        });
+        app_lib.linkLibrary(raylib_artifact);
+
+        const emcc = b.addSystemCommand(&.{"emcc"});
+
+        for (app_lib.getCompileDependencies(false)) |lib| {
+            if (lib.isStaticLibrary()) {
+                emcc.addArtifactArg(lib);
+            }
+        }
+
+        emcc.addArgs(&.{
+            "--shell-file",
+            b.path("src/shell.html").getPath(b),
+        });
+
+        //emcc.addArg("--pre-js");
+        emcc.addArg("-o");
+        const app_html = emcc.addOutputFileArg("breakout.html");
+        b.getInstallStep().dependOn(&b.addInstallDirectory(.{
+            .source_dir = app_html.dirname(),
+            .install_dir = .{ .custom = "www" },
+            .install_subdir = "",
+        }).step);
+
+        const run_emrun = b.addSystemCommand(&.{"emrun"});
+
+        run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
+
+        run_emrun.addArgs(&.{
+            "--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        });
+
+        if (b.args) |args| run_emrun.addArgs(args);
+        run_emrun.step.dependOn(b.getInstallStep());
+        const run_step = b.step("run", "Run the app");
+
+        run_step.dependOn(&run_emrun.step);
     }
-
-    const install_step = b.addInstallDirectory(.{
-        .source_dir = b.path("res"),
-        .install_dir = std.Build.InstallDir{ .custom = "res" },
-        .install_subdir = "res",
-    });
-    exe.step.dependOn(&install_step.step);
-
-    b.installArtifact(exe);
-
-    const run_cmd = b.addRunArtifact(exe);
-
-    run_cmd.step.dependOn(b.getInstallStep());
-
-    if (b.args) |args| {
-        run_cmd.addArgs(args);
-    }
-
-    const run_step = b.step("run", "Run the app");
-    run_step.dependOn(&run_cmd.step);
 }
