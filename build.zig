@@ -1,4 +1,6 @@
 const std = @import("std");
+const builtin = @import("builtin");
+
 fn addAssets(b: *std.Build, exe: *std.Build.Step.Compile) void {
     const assets = [_][]const u8{
         "res/paddle.png",
@@ -57,6 +59,19 @@ pub fn build(b: *std.Build) void {
         const run_step = b.step("run", "Run the app");
         run_step.dependOn(&run_cmd.step);
     } else {
+        if (b.sysroot == null) {
+            @panic("Pass '--sysroot \"[path to emsdk installation]/upstream/emscripten\"'");
+        }
+        const sysroot_include = b.pathJoin(&.{ b.sysroot.?, "cache", "sysroot", "include" });
+        var dir = std.fs.openDirAbsolute(sysroot_include, std.fs.Dir.OpenDirOptions{ .access_sub_paths = true, .no_follow = true }) catch @panic("No emscripten cache. Generate it!");
+        dir.close();
+
+        const emcc_exe = switch (builtin.os.tag) { // TODO bundle emcc as a build dependency
+            .windows => "emcc.bat",
+            else => "emcc",
+        };
+        const emcc_exe_path = b.pathJoin(&.{ b.sysroot.?, emcc_exe });
+
         const wasm_target = b.resolveTargetQuery(.{
             .cpu_arch = .wasm32,
             .cpu_model = .{ .explicit = &std.Target.wasm.cpu.mvp },
@@ -80,9 +95,10 @@ pub fn build(b: *std.Build) void {
             .root_module = exe_mod,
         });
         app_lib.linkLibrary(raylib_artifact);
+        app_lib.addIncludePath(.{ .cwd_relative = sysroot_include });
         addAssets(b, app_lib);
 
-        const emcc = b.addSystemCommand(&.{"emcc"});
+        const emcc = b.addSystemCommand(&[_][]const u8{emcc_exe_path});
 
         for (app_lib.getCompileDependencies(false)) |lib| {
             if (lib.isStaticLibrary()) {
