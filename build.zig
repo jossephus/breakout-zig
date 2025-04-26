@@ -79,7 +79,7 @@ pub fn build(b: *std.Build) void {
                 .atomics,
                 .bulk_memory,
             }),
-            .os_tag = .freestanding,
+            .os_tag = .emscripten,
         });
 
         const raylib_dep = b.dependency("raylib", .{
@@ -92,8 +92,14 @@ pub fn build(b: *std.Build) void {
         const app_lib = b.addLibrary(.{
             .linkage = .static,
             .name = "breakout",
-            .root_module = exe_mod,
+            .root_module = b.createModule(.{
+                .root_source_file = b.path("src/main.zig"),
+                .target = wasm_target,
+                .optimize = optimize,
+            }),
         });
+        app_lib.linkLibC();
+        app_lib.shared_memory = true;
         app_lib.linkLibrary(raylib_artifact);
         app_lib.addIncludePath(.{ .cwd_relative = sysroot_include });
         addAssets(b, app_lib);
@@ -107,6 +113,15 @@ pub fn build(b: *std.Build) void {
         }
 
         emcc.addArgs(&.{
+            "-sUSE_GLFW=3",
+            "-sUSE_OFFSET_CONVERTER",
+
+            "-sAUDIO_WORKLET=1",
+            "-sWASM_WORKERS=1",
+            "-sSHARED_MEMORY=1",
+            "-sALLOW_MEMORY_GROWTH=1",
+
+            "-sASYNCIFY",
             "--shell-file",
         });
         emcc.addFileArg(b.path("src/shell.html"));
