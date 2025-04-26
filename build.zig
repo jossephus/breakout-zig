@@ -1,4 +1,15 @@
 const std = @import("std");
+fn addAssets(b: *std.Build, exe: *std.Build.Step.Compile) void {
+    const assets = [_][]const u8{
+        "res/paddle.png",
+        "res/tennis.png",
+        "res/brick.png",
+    };
+
+    for (assets) |asset| {
+        exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+    }
+}
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -31,15 +42,7 @@ pub fn build(b: *std.Build) void {
             .install_subdir = "res",
         });
         exe.step.dependOn(&install_step.step);
-        const assets = [_][]const u8{
-            "res/paddle.png",
-            "res/tennis.png",
-            "res/brick.png",
-        };
-
-        for (assets) |asset| {
-            exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
-        }
+        addAssets(b, exe);
 
         b.installArtifact(exe);
 
@@ -77,6 +80,7 @@ pub fn build(b: *std.Build) void {
             .root_module = exe_mod,
         });
         app_lib.linkLibrary(raylib_artifact);
+        addAssets(b, app_lib);
 
         const emcc = b.addSystemCommand(&.{"emcc"});
 
