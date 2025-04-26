@@ -2,11 +2,22 @@ const Game = @import("game.zig").Game;
 const std = @import("std");
 const r = @import("raylib.zig").raylib;
 const engine = @import("engine.zig");
+const builtin = @import("builtin");
+
+var debug_allocator: std.heap.DebugAllocator(.{}) = .init;
 
 pub fn main() !void {
-    var gpa = std.heap.DebugAllocator(.{}).init;
-    defer _ = gpa.deinit();
-    const allocator = gpa.allocator();
+    const wasm = builtin.target.cpu.arch.isWasm();
+    const allocator, const is_debug = gpa: {
+        if (wasm) break :gpa .{ std.heap.wasm_allocator, false };
+        break :gpa switch (builtin.mode) {
+            .Debug, .ReleaseSafe => .{ debug_allocator.allocator(), true },
+            .ReleaseFast, .ReleaseSmall => .{ std.heap.smp_allocator, false },
+        };
+    };
+    defer if (is_debug) {
+        _ = debug_allocator.deinit();
+    };
 
     r.InitWindow(engine.W_W, engine.W_H, "breakout");
     defer r.CloseWindow();
