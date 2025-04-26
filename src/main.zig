@@ -19,6 +19,7 @@ pub fn main() !void {
         _ = debug_allocator.deinit();
     };
 
+    r.SetConfigFlags(r.FLAG_VSYNC_HINT | r.FLAG_WINDOW_RESIZABLE);
     r.InitWindow(engine.W_W, engine.W_H, "breakout");
     defer r.CloseWindow();
 
