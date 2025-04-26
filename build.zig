@@ -92,8 +92,8 @@ pub fn build(b: *std.Build) void {
 
         emcc.addArgs(&.{
             "--shell-file",
-            b.path("src/shell.html").getPath(b),
         });
+        emcc.addFileArg(b.path("src/shell.html"));
 
         //emcc.addArg("--pre-js");
         emcc.addArg("-o");
