@@ -104,18 +104,16 @@ pub fn build(b: *std.Build) void {
             .install_subdir = "",
         }).step);
 
-        const run_emrun = b.addSystemCommand(&.{"emrun"});
-
-        run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
-
-        run_emrun.addArgs(&.{
-            "--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
-        });
-
-        if (b.args) |args| run_emrun.addArgs(args);
-        run_emrun.step.dependOn(b.getInstallStep());
-        const run_step = b.step("run", "Run the app");
-
-        run_step.dependOn(&run_emrun.step);
+        // const run_emrun = b.addSystemCommand(&.{"emrun"});
+        // run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
+        // run_emrun.addArgs(&.{
+        //     "--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
+        // });
+        //
+        // if (b.args) |args| run_emrun.addArgs(args);
+        // run_emrun.step.dependOn(b.getInstallStep());
+        //
+        // const run_step = b.step("run", "Run the app");
+        // run_step.dependOn(&run_emrun.step);
     }
 }
