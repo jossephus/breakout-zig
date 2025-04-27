@@ -83,7 +83,7 @@ pub fn build(b: *std.Build) void {
         });
 
         const raylib_dep = b.dependency("raylib", .{
-            .target = wasm_target,
+            .target = target,
             .optimize = optimize,
             .rmodels = false,
         });
@@ -101,8 +101,18 @@ pub fn build(b: *std.Build) void {
         app_lib.linkLibC();
         app_lib.shared_memory = true;
         app_lib.linkLibrary(raylib_artifact);
-        app_lib.addIncludePath(.{ .cwd_relative = sysroot_include });
-        addAssets(b, app_lib);
+        
+        app_lib.addIncludePath(.{ .cwd_relative = ".emscripten_cache-3.1.73/sysroot/include" });
+
+        const assets = [_][]const u8{
+            "res/paddle.png",
+            "res/tennis.png",
+            "res/brick.png",
+        };
+
+        for (assets) |asset| {
+            app_lib.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+        }
 
         const emcc = b.addSystemCommand(&[_][]const u8{emcc_exe_path});
 
@@ -115,9 +125,8 @@ pub fn build(b: *std.Build) void {
         emcc.addArgs(&.{
             "-sUSE_GLFW=3",
             "-sUSE_OFFSET_CONVERTER",
-
-            "-sAUDIO_WORKLET=1",
-            "-sWASM_WORKERS=1",
+            //"-sAUDIO_WORKLET=1",
+            //"-sWASM_WORKERS=1",
             "-sSHARED_MEMORY=1",
             "-sALLOW_MEMORY_GROWTH=1",
 
@@ -126,25 +135,23 @@ pub fn build(b: *std.Build) void {
         });
         emcc.addFileArg(b.path("src/shell.html"));
 
+        const link_items: []const *std.Build.Step.Compile = &.{
+            raylib_artifact,
+            app_lib,
+        };
+
+        for (link_items) |item| {
+            emcc.addFileArg(item.getEmittedBin());
+            emcc.step.dependOn(&item.step);
+        }
+
         //emcc.addArg("--pre-js");
         emcc.addArg("-o");
-        const app_html = emcc.addOutputFileArg("breakout.html");
+        const app_html = emcc.addOutputFileArg("index.html");
         b.getInstallStep().dependOn(&b.addInstallDirectory(.{
             .source_dir = app_html.dirname(),
             .install_dir = .{ .custom = "www" },
             .install_subdir = "",
         }).step);
-
-        // const run_emrun = b.addSystemCommand(&.{"emrun"});
-        // run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
-        // run_emrun.addArgs(&.{
-        //     "--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
-        // });
-        //
-        // if (b.args) |args| run_emrun.addArgs(args);
-        // run_emrun.step.dependOn(b.getInstallStep());
-        //
-        // const run_step = b.step("run", "Run the app");
-        // run_step.dependOn(&run_emrun.step);
     }
 }

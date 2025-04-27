@@ -340,12 +340,27 @@ jwE50AGjLCVuS8Yt4H7OgZLKK5EKOsLviEWJSL/+0uMi7gLUSBseYwqEbXvSHCec1CJvZPyHCmYQffaB
             },
             false,
           );
-          canvas.addEventListener("keydown", (e) => {
-            if(["Space","ArrowUp","ArrowDown","ArrowLeft","ArrowRight","F1","F3","F5"].indexOf(e.code) > -1) {
-              e.preventDefault();
-            }
-          }, false);
-          canvas.scrollIntoView({behavior: "smooth"});
+          canvas.addEventListener(
+            "keydown",
+            (e) => {
+              if (
+                [
+                  "Space",
+                  "ArrowUp",
+                  "ArrowDown",
+                  "ArrowLeft",
+                  "ArrowRight",
+                  "F1",
+                  "F3",
+                  "F5",
+                ].indexOf(e.code) > -1
+              ) {
+                e.preventDefault();
+              }
+            },
+            false,
+          );
+          canvas.scrollIntoView({ behavior: "smooth" });
           canvas.focus();
 
           return canvas;
