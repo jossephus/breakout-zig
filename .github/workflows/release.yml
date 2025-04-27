@@ -24,9 +24,20 @@ jobs:
       - name: release-windows
         run: nix develop -c zig build -Dtarget=x86_64-windows -Doptimize=ReleaseSmall
 
+      - name: build-emscripten
+        run: nix develop -c zig build -Dtarget=wasm32-emscripten -Doptimize=ReleaseSmall
+
       - name: Upload Releases
         uses: softprops/action-gh-release@v1
         with:
           files: |
             ./zig-out/bin/breakout.exe
             ./zig-out/bin/breakout
+
+      - name: Deploy to Github Pages
+        uses: peaceiris/actions-gh-pages@v3
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_dir: ./zig-out/www/
+          publish_branch: gh-pages
+          destination_dir: .

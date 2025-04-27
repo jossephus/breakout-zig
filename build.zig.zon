@@ -37,8 +37,12 @@
     // internet connectivity.
     .dependencies = .{
         .raylib = .{
-            .url = "git+https://github.com/raysan5/raylib/?ref=HEAD#80fcca4155fde407b1551721b6271f9a1fe527d3",
-            .hash = "raylib-5.5.0-whq8uPuyNARF5oIcIW5D0fNHVw_Zg6dB6q0DhTSjKGr-",
+            .url = "https://github.com/raysan5/raylib/archive/27a4fe885164b315a90b67682f981a1e03d6079c.tar.gz",
+            .hash = "raylib-5.5.0-whq8uFqtNARw6t1tTakBDSVYgUjlBqnDppOyNfE_yfCa",
+        },
+        .zap = .{
+            .url = "https://github.com/zigzap/zap/archive/b134f969f3c36c545d21ebaaa1c4cd366e9e7a54.tar.gz",
+            .hash = "zap-0.9.1-GoeB85JTJAADY1vAnA4lTuU66t6JJiuhGos5ex6CpifA",
         },
     },
     .paths = .{
