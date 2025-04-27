@@ -1,4 +1,17 @@
 const std = @import("std");
+const builtin = @import("builtin");
+
+fn addAssets(b: *std.Build, exe: *std.Build.Step.Compile) void {
+    const assets = [_][]const u8{
+        "res/paddle.png",
+        "res/tennis.png",
+        "res/brick.png",
+    };
+
+    for (assets) |asset| {
+        exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
+    }
+}
 
 pub fn build(b: *std.Build) void {
     const target = b.standardTargetOptions(.{});
@@ -31,15 +44,7 @@ pub fn build(b: *std.Build) void {
             .install_subdir = "res",
         });
         exe.step.dependOn(&install_step.step);
-        const assets = [_][]const u8{
-            "res/paddle.png",
-            "res/tennis.png",
-            "res/brick.png",
-        };
-
-        for (assets) |asset| {
-            exe.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
-        }
+        addAssets(b, exe);
 
         b.installArtifact(exe);
 
@@ -54,6 +59,19 @@ pub fn build(b: *std.Build) void {
         const run_step = b.step("run", "Run the app");
         run_step.dependOn(&run_cmd.step);
     } else {
+        if (b.sysroot == null) {
+            @panic("Pass '--sysroot \"[path to emsdk installation]/upstream/emscripten\"'");
+        }
+        const sysroot_include = b.pathJoin(&.{ b.sysroot.?, "cache", "sysroot", "include" });
+        var dir = std.fs.openDirAbsolute(sysroot_include, std.fs.Dir.OpenDirOptions{ .access_sub_paths = true, .no_follow = true }) catch @panic("No emscripten cache. Generate it!");
+        dir.close();
+
+        const emcc_exe = switch (builtin.os.tag) { // TODO bundle emcc as a build dependency
+            .windows => "emcc.bat",
+            else => "emcc",
+        };
+        const emcc_exe_path = b.pathJoin(&.{ b.sysroot.?, emcc_exe });
+
         const wasm_target = b.resolveTargetQuery(.{
             .cpu_arch = .wasm32,
             .cpu_model = .{ .explicit = &std.Target.wasm.cpu.mvp },
@@ -83,6 +101,7 @@ pub fn build(b: *std.Build) void {
         app_lib.linkLibC();
         app_lib.shared_memory = true;
         app_lib.linkLibrary(raylib_artifact);
+        
         app_lib.addIncludePath(.{ .cwd_relative = ".emscripten_cache-3.1.73/sysroot/include" });
 
         const assets = [_][]const u8{
@@ -95,7 +114,7 @@ pub fn build(b: *std.Build) void {
             app_lib.root_module.addAnonymousImport(asset, .{ .root_source_file = b.path(asset) });
         }
 
-        const emcc = b.addSystemCommand(&.{"emcc"});
+        const emcc = b.addSystemCommand(&[_][]const u8{emcc_exe_path});
 
         for (app_lib.getCompileDependencies(false)) |lib| {
             if (lib.isStaticLibrary()) {
@@ -106,7 +125,6 @@ pub fn build(b: *std.Build) void {
         emcc.addArgs(&.{
             "-sUSE_GLFW=3",
             "-sUSE_OFFSET_CONVERTER",
-
             //"-sAUDIO_WORKLET=1",
             //"-sWASM_WORKERS=1",
             "-sSHARED_MEMORY=1",
@@ -114,8 +132,8 @@ pub fn build(b: *std.Build) void {
 
             "-sASYNCIFY",
             "--shell-file",
-            b.path("src/shell.html").getPath(b),
         });
+        emcc.addFileArg(b.path("src/shell.html"));
 
         const link_items: []const *std.Build.Step.Compile = &.{
             raylib_artifact,
@@ -135,19 +153,5 @@ pub fn build(b: *std.Build) void {
             .install_dir = .{ .custom = "www" },
             .install_subdir = "",
         }).step);
-
-        //const run_emrun = b.addSystemCommand(&.{"emrun"});
-
-        //run_emrun.addArg(b.pathJoin(&.{ b.install_path, "www", "breakout.html" }));
-
-        //run_emrun.addArgs(&.{
-        //"--browser=/mnt/c/Program Files/Google/Chrome/Application/chrome.exe",
-        //});
-
-        //if (b.args) |args| run_emrun.addArgs(args);
-        //run_emrun.step.dependOn(b.getInstallStep());
-        //const run_step = b.step("run", "Run the app");
-
-        //run_step.dependOn(&run_emrun.step);
     }
 }

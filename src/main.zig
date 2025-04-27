@@ -18,9 +18,7 @@ pub fn main() !void {
     defer if (is_debug) {
         _ = debug_allocator.deinit();
     };
-
     r.SetConfigFlags(r.FLAG_VSYNC_HINT | r.FLAG_WINDOW_RESIZABLE);
-
     r.InitWindow(engine.W_W, engine.W_H, "breakout");
     defer r.CloseWindow();
 
