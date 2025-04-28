@@ -125,14 +125,14 @@ pub const Game = struct {
     }
 
     fn update_over(self: *Game) void {
-        if (r.IsKeyDown(r.KEY_SPACE)) {
+        if (r.IsKeyDown(r.KEY_SPACE) or r.GetTouchPointCount() > 0) {
             self.deinit();
             self.restart() catch @panic("Unable to restart");
         }
     }
 
     fn update_won(self: *Game) void {
-        if (r.IsKeyDown(r.KEY_SPACE)) {
+        if (r.IsKeyDown(r.KEY_SPACE) or r.GetTouchPointCount() > 0) {
             self.deinit();
             self.restart() catch @panic("Unable to restart");
         }
@@ -203,6 +203,16 @@ pub const Game = struct {
         if (r.IsKeyDown(r.KEY_RIGHT)) {
             self.paddle.rec.x += paddle.PADDLE_SPEED * dt;
         }
+        // Android Support
+        if (r.GetTouchPointCount() > 0) {
+            const touchPos = r.GetTouchPosition(0);
+
+            if (touchPos.x < @as(f32, engine.W_W) / 2.0) {
+                self.paddle.rec.x -= paddle.PADDLE_SPEED * dt;
+            } else {
+                self.paddle.rec.x += paddle.PADDLE_SPEED * dt;
+            }
+        }
 
         for (self.particle_instances.items) |*pi| {
             for (&pi.particles) |*p| {
@@ -263,7 +273,7 @@ pub const Game = struct {
     }
 
     pub fn update_start(self: *Game) void {
-        if (r.IsKeyDown(r.KEY_SPACE)) {
+        if (r.IsKeyDown(r.KEY_SPACE) or r.GetTouchPointCount() > 0) {
             self.status = GameStatus.Playing;
         }
     }
