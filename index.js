@@ -1094,28 +1094,28 @@ function dbg(...args) {
 // end include: runtime_debug.js
 // === Body ===
 var ASM_CONSTS = {
-  104256: () => {
+  104320: () => {
     if (document.fullscreenElement) return 1;
   },
-  104302: () => Module.canvas.width,
-  104334: () => parseInt(Module.canvas.style.width),
-  104382: () => {
+  104366: () => Module.canvas.width,
+  104398: () => parseInt(Module.canvas.style.width),
+  104446: () => {
     document.exitFullscreen();
   },
-  104409: () => {
+  104473: () => {
     setTimeout(function() {
       Module.requestFullscreen(false, false);
     }, 100);
   },
-  104482: () => {
+  104546: () => {
     if (document.fullscreenElement) return 1;
   },
-  104528: () => Module.canvas.width,
-  104560: () => screen.width,
-  104585: () => {
+  104592: () => Module.canvas.width,
+  104624: () => screen.width,
+  104649: () => {
     document.exitFullscreen();
   },
-  104612: () => {
+  104676: () => {
     setTimeout(function() {
       Module.requestFullscreen(false, true);
       setTimeout(function() {
@@ -1123,54 +1123,54 @@ var ASM_CONSTS = {
       }, 100);
     }, 100);
   },
-  104745: () => window.innerWidth,
-  104771: () => window.innerHeight,
-  104798: () => {
+  104809: () => window.innerWidth,
+  104835: () => window.innerHeight,
+  104862: () => {
     if (document.fullscreenElement) return 1;
   },
-  104844: () => Module.canvas.width,
-  104876: () => parseInt(Module.canvas.style.width),
-  104924: () => {
+  104908: () => Module.canvas.width,
+  104940: () => parseInt(Module.canvas.style.width),
+  104988: () => {
     if (document.fullscreenElement) return 1;
   },
-  104970: () => Module.canvas.width,
-  105002: () => screen.width,
-  105027: () => window.innerWidth,
-  105053: () => window.innerHeight,
-  105080: () => {
+  105034: () => Module.canvas.width,
+  105066: () => screen.width,
+  105091: () => window.innerWidth,
+  105117: () => window.innerHeight,
+  105144: () => {
     if (document.fullscreenElement) return 1;
   },
-  105126: () => Module.canvas.width,
-  105158: () => screen.width,
-  105183: () => {
+  105190: () => Module.canvas.width,
+  105222: () => screen.width,
+  105247: () => {
     document.exitFullscreen();
   },
-  105210: () => {
+  105274: () => {
     if (document.fullscreenElement) return 1;
   },
-  105256: () => Module.canvas.width,
-  105288: () => parseInt(Module.canvas.style.width),
-  105336: () => {
+  105320: () => Module.canvas.width,
+  105352: () => parseInt(Module.canvas.style.width),
+  105400: () => {
     document.exitFullscreen();
   },
-  105363: $0 => {
+  105427: $0 => {
     Module.canvas.style.opacity = $0;
   },
-  105401: () => screen.width,
-  105426: () => screen.height,
-  105452: () => window.screenX,
-  105479: () => window.screenY,
-  105506: () => window.devicePixelRatio,
-  105542: $0 => {
+  105465: () => screen.width,
+  105490: () => screen.height,
+  105516: () => window.screenX,
+  105543: () => window.screenY,
+  105570: () => window.devicePixelRatio,
+  105606: $0 => {
     navigator.clipboard.writeText(UTF8ToString($0));
   },
-  105595: $0 => {
+  105659: $0 => {
     Module.canvas.style.cursor = UTF8ToString($0);
   },
-  105646: () => {
+  105710: () => {
     Module.canvas.style.cursor = "none";
   },
-  105683: ($0, $1, $2, $3) => {
+  105747: ($0, $1, $2, $3) => {
     try {
       navigator.getGamepads()[$0].vibrationActuator.playEffect("dual-rumble", {
         startDelay: 0,
@@ -1184,15 +1184,15 @@ var ASM_CONSTS = {
       } catch (e) {}
     }
   },
-  105939: $0 => {
+  106003: $0 => {
     Module.canvas.style.cursor = UTF8ToString($0);
   },
-  105990: () => {
+  106054: () => {
     if (document.fullscreenElement) return 1;
   },
-  106036: () => window.innerWidth,
-  106062: () => window.innerHeight,
-  106089: () => {
+  106100: () => window.innerWidth,
+  106126: () => window.innerHeight,
+  106153: () => {
     if (document.pointerLockElement) return 1;
   }
 };
